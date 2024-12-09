@@ -2480,7 +2480,13 @@ public function get_previous_income($from,$to,$comp_id,$blanch_id){
 }
 
 
-public function get_previous_income_all($from, $to, $comp_id, $blanch_id) {
+public function get_previous_income_all($from,$to,$comp_id){
+	$income = $this->db->query("SELECT * FROM tbl_receve r JOIN tbl_income i ON i.inc_id = r.inc_id JOIN tbl_customer c ON c.customer_id = r.customer_id JOIN tbl_blanch b ON b.blanch_id = c.blanch_id WHERE r.receve_day between '$from' and '$to' AND r.comp_id = '$comp_id' GROUP BY r.blanch_id");
+	 return $income->result();
+}
+
+
+public function get_previous_icome_all($from, $to, $comp_id, $blanch_id) {
     $sql = "
         SELECT 
             r.*, i.*, c.*, b.* , e.*
