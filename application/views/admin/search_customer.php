@@ -11,7 +11,7 @@
                             <li class="breadcrumb-item"><a href="<?php echo base_url("admin/index"); ?>"><i class="icon-home"></i></a></li>
                             
                             <li class="breadcrumb-item active">Loan</li>
-                            <li class="breadcrumb-item active">Gualantors Information</li>
+                            <li class="breadcrumb-item active">Guarantor's information</li>
                         </ul>
                     </div>            
                  

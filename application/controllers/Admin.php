@@ -54,11 +54,71 @@ class Admin extends CI_Controller {
 
 	 $account_capital = $this->queries->get_total_sumaryAccount($comp_id);
 
+  //  JAMES CODES
+  $loan_withdrawal = $this->queries->get_loan_withdrawal_current_month($comp_id);
+  $total_loan_with = $this->queries->get_total_withdrawal_current_month($comp_id);
+  $total_interest_monthly = $this->queries->get_total_loan_interest_current_month($comp_id);
+  $montly_interest = $this->queries->get_interest_of_current_month($comp_id);
+  $customer_monthly = $this->queries->get_customer_withdrawal_current_month($comp_id);
+  $total_withdraw_last_month = $this->queries-> get_total_withdrawal_last_month($comp_id);
+  $monthly_income = $this ->queries->get_monthly_income_detail($comp_id);
+  $total_monthly_income =$this->queries->get_sum_monthly_income($comp_id);
+  $rejesho = $this->queries->get_total_recevable($comp_id);
+  $total_malazo= $this->queries->get_total_malazo_pendingComp($comp_id);
+  $sugus= $this->queries->get_outstand_sixmonth_loan_company($comp_id);
+  $total_remain_amount = $this->queries->get_total_remain_amount($sugus);
 
-	      // print_r($blanch_capital_circle);
-	      //         exit();
-	$this->load->view('admin/index',['receivable_total'=>$receivable_total,'total_received'=>$total_received,'total_loan_pending'=>$total_loan_pending,'total_loanWithdrawal'=>$total_loanWithdrawal,'today_penart'=>$today_penart,'prepaid_today'=>$prepaid_today,'total_received'=>$total_received,'prepaid_today'=>$prepaid_today,'total_loan_fee'=>$total_loan_fee,'today_income'=>$today_income,'toay_expences'=>$toay_expences,'total_capital'=>$total_capital,'out_float'=>$out_float,'cash_bank'=>$cash_bank,'principal_loan'=>$principal_loan,'done_loan'=>$done_loan,'total_expect'=>$total_expect,'total_receved'=>$total_receved,'cash_depost'=>$cash_depost,'cash_income'=>$cash_income,'cash_expences'=>$cash_expences,'blanch'=>$blanch,'total_remain'=>$total_remain,'today_total_loan_pend'=>$today_total_loan_pend,'loanAprove'=>$loanAprove,'withdrawal'=>$withdrawal,'loan_depost'=>$loan_depost,'receive_Amount'=>$receive_Amount,'loan_fee'=>$loan_fee,'request_expences'=>$request_expences,'sum_comp_capital'=>$sum_comp_capital,'total_deducted_balance'=>$total_deducted_balance,'total_non'=>$total_non,'blanch_capital_circle'=>$blanch_capital_circle,'account_capital'=>$account_capital]);
+
+  // echo "<pre>";
+  //     print_r($total_remain_amount );
+  //             exit();
+ 
+  
+
+// echo "<pre>";
+// 	      print_r($six_monthly );
+// 	              exit();
+	$this->load->view('admin/index',['receivable_total'=>$receivable_total,'total_received'=>$total_received,'total_loan_pending'=>$total_loan_pending,'total_loanWithdrawal'=>$total_loanWithdrawal,'today_penart'=>$today_penart,'prepaid_today'=>$prepaid_today,'total_received'=>$total_received,'prepaid_today'=>$prepaid_today,'total_loan_fee'=>$total_loan_fee,'today_income'=>$today_income,'toay_expences'=>$toay_expences,'total_capital'=>$total_capital,'out_float'=>$out_float,'cash_bank'=>$cash_bank,'principal_loan'=>$principal_loan,'done_loan'=>$done_loan,'total_expect'=>$total_expect,'total_receved'=>$total_receved,'cash_depost'=>$cash_depost,'cash_income'=>$cash_income,'cash_expences'=>$cash_expences,'blanch'=>$blanch,'total_remain'=>$total_remain,'today_total_loan_pend'=>$today_total_loan_pend,'loanAprove'=>$loanAprove,'withdrawal'=>$withdrawal,'loan_depost'=>$loan_depost,'receive_Amount'=>$receive_Amount,'loan_fee'=>$loan_fee,'request_expences'=>$request_expences,'sum_comp_capital'=>$sum_comp_capital,'total_deducted_balance'=>$total_deducted_balance,'total_non'=>$total_non,
+  'blanch_capital_circle'=>$blanch_capital_circle,
+  'account_capital'=>$account_capital , 'total_loan_with' =>$total_loan_with,
+  'montly_interest' => $montly_interest, 'customer_monthly' =>$customer_monthly,
+  'total_monthly_income' =>$total_monthly_income ,
+   'rejesho' => $rejesho , 'total_malazo' => $total_malazo, 'total_remain_amount' => $total_remain_amount]);
 	}
+
+  public function mikopo_chefuchefu()
+  {
+    $this->load->model('queries');
+    $comp_id = $this->session->userdata('comp_id');
+    $sugus= $this->queries->get_outstand_sixmonth_loan_company($comp_id);
+
+    // echo "<pre>";
+	  //     print_r($sugus );
+	  //             exit();
+    $this->load->view('admin/chefuchefu',['sugus'=> $sugus]);
+  }
+  public function monthly_withdrawal()
+  {
+    $this->load->model('queries');
+    $comp_id = $this->session->userdata('comp_id');
+    $customer_monthly =  $this->queries->get_withdrawal_current_month($comp_id);
+// echo "<pre>";
+// 	      print_r(  $customer_monthly );
+// 	              exit();
+    $this->load->view('admin/monthly_withdrawal',['customer_monthly'=> $customer_monthly]);
+
+  }
+
+  public function monthly_income()
+{
+  $this->load->model('queries');
+  $comp_id = $this->session->userdata('comp_id');
+  $monthly_income = $this ->queries->get_monthly_income_detail($comp_id);
+  // echo "<pre>";
+	//       print_r(  $monthly_income );
+	//               exit();
+  $this->load->view('admin/monthly_income',['monthly_income'=> $monthly_income]);
+}
 
 
 
@@ -1589,6 +1649,7 @@ $this->load->view('admin/search_customer',['customer'=>$customer,'sponser'=>$spo
             'sp_lname'=> $this->input->post('sp_lname'),
             'sp_phone_no'=> $this->input->post('sp_phone_no'),
             'sp_relation'=> $this->input->post('sp_relation'),
+            'created_at'    => date('Y-m-d H:i:s'),
             );
             //   echo "<pre>";
             // print_r($data);
@@ -3005,12 +3066,22 @@ public function disburse($loan_id){
     $customer = $this->queries->search_CustomerLoan($customer_id);
     @$blanch_id = $customer->blanch_id;
     $acount = $this->queries->get_customer_account_verfied($blanch_id);
-
-  
+    $repayments =$this->queries->get_total_repayment_days($customer_id);
+    $paid_days =$this->queries->get_total_repaid_days($customer_id);
+    $missed_days = $this->queries-> get_total_missed_days($customer_id);
+    $missed_amount =$this->queries->get_total_missed_amount($customer_id);
+    $loan_status= $this->queries->get_customer_status($customer_id);
+    $sponsors =$this->queries->get_latest_sponsor_data($customer_id);
+   
+//  echo "<pre>";
+//   print_r($sponsors);
+//            exit();
 
    
 
-    $this->load->view('admin/search_loan_customer',['customer'=>$customer,'customery'=>$customery,'acount'=>$acount,'yesterday_balance'=>$yesterday_balance,'today_deposit'=>$today_deposit,'loanwith'=>$loanwith,'balance_blanch'=>$balance_blanch]);
+    $this->load->view('admin/search_loan_customer',['customer'=>$customer,'customery'=>$customery,'acount'=>$acount,'yesterday_balance'=>$yesterday_balance,'today_deposit'=>$today_deposit,'loanwith'=>$loanwith,
+    'balance_blanch'=>$balance_blanch , 'repayments' => $repayments, 'paid_days'=>$paid_days ,
+  'missed_days' => $missed_days , 'loan_status' =>$loan_status , 'sponsors' => $sponsors]);
 }
 
 
@@ -5296,7 +5367,7 @@ public function previous_transfor(){
 
 
       //  echo "<pre>";
-      // print_r($new_pending);
+      // print_r( $new_pending);
       //     exit();
     
     $this->load->view('admin/loan_pending_time',['blanch'=>$blanch,'new_pending'=>$new_pending,'total_pending_new'=>$total_pending_new,'old_newpend'=>$old_newpend,'pend'=>$pend]);
@@ -6159,7 +6230,8 @@ public function get_remove_expenses($req_id){
     $type = $data_req->deduct_type;
     $blanch_id = $data_req->blanch_id;
     $req_amount = $data_req->req_amount;
-    // print_r($req_amount);
+    // echo "<pre>";
+    // print_r( $data_req);
     //         exit();
 
         $deducted_income = $this->queries->get_deducted_income_blanch($blanch_id);
@@ -6515,9 +6587,9 @@ $compdata = $this->queries->get_companyData($comp_id);
 		$total_receved = $this->queries->get_sum_income($comp_id);
 		$customer = $this->queries->get_allcutomer($comp_id);
 		$blanch = $this->queries->get_blanch($comp_id);
-		 // echo "<pre>";
-		 //   print_r($blanch);
-		 //         exit();
+		//  echo "<pre>";
+		//    print_r($income);
+		//          exit();
 		$this->load->view('admin/income_dashboard',['income'=>$income,'detail_income'=>$detail_income,'total_receved'=>$total_receved,'customer'=>$customer,'blanch'=>$blanch]);
 	}
 
@@ -6823,7 +6895,8 @@ echo $this->queries->fetch_loancustomer($this->input->post('customer_id'));
         $first_name = $data_sms->f_name;
         $midle_name = $data_sms->m_name;
         $last_name = $data_sms->l_name;
-        $massage = 'Ndugu, ' .$first_name . ' ' .$midle_name . ' ' .$last_name . ' ' .'Umelipa faini ya Tsh.'. number_format($penart_paid) . ' '.$comp_name .' kwa msaada 0679420326 / 0629364847';
+        $massage = 'Ndugu, ' .$first_name . ' ' .$midle_name . ' ' .$last_name . ' ' .'Umelipa faini ya Tsh.'. number_format($penart_paid) . ' '.$comp_name .' kwa msaada 0762178026';
+        
 			 // print_r($username);
 			 //     exit();
              
@@ -7091,7 +7164,7 @@ return true;
 		$employee = $this->queries->get_today_recevable_employee($comp_id);
 		$blanch = $this->queries->get_blanch($comp_id);
 		  //     echo "<pre>";
-		  // print_r($employee);
+		  // print_r($rejesho);
 		  //           exit();
 		$this->load->view('admin/today_recevable',['today_recevable'=>$today_recevable,'rejesho'=>$rejesho,'employee'=>$employee,'blanch'=>$blanch]);
 	}
@@ -9901,7 +9974,7 @@ public function send_staff_sms($empl_id,$comp_id,$loan_status){
 // }
 
 public function sendsms($phone,$massage){
-	//public function sendsms(){
+	//public function sendsms(){f
 	//$phone = '255628323760';
 	//$massage = 'mapenzi yanauwa';
 	$api_key = 'PE3CBF71w4MpSnkZ';

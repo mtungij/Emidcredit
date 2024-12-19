@@ -789,7 +789,9 @@ public function send_reminder_auto_receivable($comp_id,$customer_id,$loan_id){
 	$last_name = $data_sms->l_name;
 
 	$restoration = $loan_restoration->restration;
-	$massage = 'Ndugu Mteja Unakumbushwa Kuleta Rejesho La Tsh.' .number_format($restoration) .' '. $comp_name .' '. 'Kabla ya Saa 11:00 Jioni Kuepuka Kupigwa faini ya Kuchelewesha.';
+	$massage = 'Mpendwa Mteja, tunakukumbusha kulipa rejesho la Tsh ' . number_format($restoration) . 
+           ' kwa ' . $comp_name . ' kabla ya saa 10:30 jioni ili kuepuka faini ya ucheleweshaji';
+
 	//    echo "<pre>";
 	// print_r($phone);
 	//      exit();

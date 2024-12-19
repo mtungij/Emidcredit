@@ -68,8 +68,8 @@
                             <li><a href="javascript:void(0);" class="has-arrow"><i class="icon-wallet"></i><span>Income</span> </a>
                                 <ul>
                                     <li><a href="<?php echo base_url("admin/income_detail"); ?>">Register Income</a></li>
-                                    <li><a href="<?php echo base_url("admin/income_dashboard"); ?>">Non-Deducted Income</a></li>
-                                    <li><a href="<?php echo base_url("admin/deducted_income"); ?>">Deducted Income</a></li>
+                                    <li><a href="<?php echo base_url("admin/income_dashboard"); ?>">Fain</a></li>
+                                    <li><a href="<?php echo base_url("admin/deducted_income"); ?>">Fomu</a></li>
                                     <!-- <li><a href="javascript:;">Transfor Income Branch To Branch</a></li>
                                     <li><a href="javascript:;">Transfor Income Branch To Company</a></li> -->
                                     <li><a href="<?php echo base_url("admin/income_balance"); ?>">Income Balance</a></li>
@@ -134,6 +134,14 @@
                     <nav class="sidebar-nav">
                         <ul class="main-menu metismenu">
                         	<li><a href="<?php echo base_url("admin/cash_transaction"); ?>"><i class="icon-wallet"></i>Cash Transaction</a></li>
+                            <li>
+                                <a href="#uiElements" class="has-arrow"><i class="icon-wallet"></i> <span>Report za Mwezi</span></a>
+                                <ul>
+                                    <li><a href="<?php echo base_url("admin/monthly_withdrawal") ?>">Gawa ya Mwezi</a></li>
+                                    <li><a href="<?php echo base_url("admin/monthly_income") ?>">Faini ya Mwezi</a></li>
+                                    <li><a href="<?php echo base_url("admin/mikopo_chefuchefu") ?>">Mikopo chefuchefu</a></li>
+                                </ul>
+                            </li>
                         	<li><a href="<?php echo base_url("admin/blanchiwise_report"); ?>"><i class="icon-list"></i>Branch Wise Report</a></li>
                         	<li><a href="<?php echo base_url("admin/loan_pending_time"); ?>"><i class="icon-list"></i>Loan Pending</a></li>
                         	<li><a href="<?php echo base_url("admin/repaymant_data"); ?>"><i class="icon-list"></i>Loan Repayment</a></li>

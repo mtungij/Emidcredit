@@ -252,7 +252,9 @@ public function create_income_detail(){
         $first_name = $data_sms->f_name;
         $midle_name = $data_sms->m_name;
         $last_name = $data_sms->l_name;
-        $massage = 'Ndugu, ' .$first_name . ' ' .$midle_name . ' ' .$last_name . ' ' .'Umelipa faini ya Tsh.'. number_format($penart_paid) . ' '.$comp_name .' kwa msaada 0679420326 / 0629364847';
+        $massage = 'Ndugu ' . $first_name . ' ' . $last_name . ', ' .
+    'Umelipa Faini ya Tsh. ' . number_format($penart_paid) . '. ' .
+    'Leta marejesho kwa wakati ili kuepuka adhabu. Msaada: 0712345678.';
     //    echo "<pre>";
     // print_r($massage);
     //      exit();
@@ -1073,6 +1075,7 @@ public function modify_sponser($sp_id,$customer_id){
             'sp_lname'=> $this->input->post('sp_lname'),
             'sp_phone_no'=> $this->input->post('sp_phone_no'),
             'sp_relation'=> $this->input->post('sp_relation'),
+            'created_at'    => date('Y-m-d H:i:s'),
             );
             //   echo "<pre>";
             // print_r($data);
@@ -2647,7 +2650,7 @@ $this->db->query("INSERT INTO tbl_outstand (`comp_id`,`loan_id`,`blanch_id`,`loa
             //sms send
           $today = date("Y-m-d") ;
          $date = date("d/m/Y");
-          $sms = 'Ndugu, '.$full_name. ' '. $date. ' Umeingiza TZS.' .number_format($new_balance). ' ' . $comp_name.' Mpokeaji '.$role . ' bado unadaiwa kiasi cha TZS.'.$remain_loan;
+          $sms = 'Ndugu, '.$full_name. ' '. ' Umefanya malipo ya TZS.' .number_format($new_balance). ' leo tarehe  ' . $date. ' ' . $comp_name.' Mpokeaji '.$role . ' bado unadaiwa kiasi cha TZS.'.$remain_loan;
           $massage = $sms;
           $phone = $phones;
 
@@ -2730,8 +2733,8 @@ $this->db->query("INSERT INTO tbl_outstand (`comp_id`,`loan_id`,`blanch_id`,`loa
             //sms send
           $today = date("Y-m-d") ;
          $date = date("d/m/Y");
-          $sms = 'Ndugu, '.$full_name. ' '. $date. ' Umeingiza TZS.' .number_format($new_balance). ' ' . $comp_name.' Mpokeaji '.$role . ' bado unadaiwa kiasi cha TZS.'.$remain_loan;
-
+          
+          $sms = 'Ndugu, '.$full_name. ' '. ' Umefanya malipo ya TZS.' .number_format($new_balance). ' leo tarehe  ' . $date. ' ' . $comp_name.' Mpokeaji '.$role . ' bado unadaiwa kiasi cha TZS.'.$remain_loan;
           $massage = $sms;
           $phone = $phones;
 
@@ -2851,7 +2854,7 @@ $this->db->query("INSERT INTO tbl_outstand (`comp_id`,`loan_id`,`blanch_id`,`loa
             //sms send
          $today = date("Y-m-d") ;
          $date = date("d/m/Y");
-          $sms = 'Ndugu, '.$full_name. ' '. $date. ' Umeingiza TZS.' .number_format($new_balance). ' ' . $comp_name.' Mpokeaji '.$role . ' bado unadaiwa kiasi cha TZS.'.$remain_loan;
+         $sms = 'Ndugu, '.$full_name. ' '. ' Umefanya malipo ya TZS.' .number_format($new_balance). ' leo tarehe  ' . $date. ' ' . $comp_name.' Mpokeaji '.$role . ' bado unadaiwa kiasi cha TZS.'.$remain_loan;
 
           $massage = $sms;
           $phone = $phones;
@@ -5214,7 +5217,7 @@ public function deposit_loan_saving(){
          $loan_int = $loan_restoration->loan_int;
          $remain_loan = $loan_int - $total_depost->remain_balance_loan;
             //sms send
-          $sms = 'Umeingiza Tsh.' .$new_balance. ' kwenye Acc Yako ' . $loan_codeID . $comp_name.' Mpokeaji '.$role . ' Kiasi kilicho baki Kulipwa ni Tsh.'.$remain_loan.' Kwa malalamiko piga '.$comp_phone;
+            $sms = 'Ndugu, '.$full_name. ' '. ' Umefanya malipo ya TZS.' .number_format($new_balance). ' leo tarehe  ' . $date. ' ' . $comp_name.' Mpokeaji '.$role . ' bado unadaiwa kiasi cha TZS.'.$remain_loan;
           $massage = $sms;
           $phone = $phones;
 

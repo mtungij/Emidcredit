@@ -7291,5 +7291,470 @@ public function check_employee_privillage($priv,$empl_id,$comp_id){
 		return $data->result();
 	}
 	
+	public function get_total_repayment_days($customer_id)
+{
+    $this->db->select('tbl_loans.session'); 
+    $this->db->from('tbl_customer');
+    $this->db->join('tbl_loans', 'tbl_customer.customer_id = tbl_loans.customer_id');
+    $this->db->where('tbl_customer.customer_id', $customer_id);
+    $query = $this->db->get();
+
+    return $query->row()->session ?? null;  // Returns session or null if not found
+}
+
+public function get_total_repaid_days($customer_id)
+{
+    
+    $this->db->select('tbl_loans.session, COUNT(tbl_prev_lecod.lecod_day) as lecod_count');
+    $this->db->from('tbl_customer');
+    $this->db->join('tbl_loans', 'tbl_customer.customer_id = tbl_loans.customer_id');
+    
+    
+    $this->db->join('tbl_prev_lecod', 'tbl_loans.loan_id = tbl_prev_lecod.loan_id AND tbl_prev_lecod.depost IS NOT NULL', 'left');
+    
+   
+    $this->db->where('tbl_customer.customer_id', $customer_id);
+  
+    
+  
+    
+  
+    $query = $this->db->get();
+
+    
+    return $query->row() ? $query->row() : null;
+}
+
+public function get_total_missed_days($customer_id)
+{
+    
+    $this->db->select('tbl_loans.session, COUNT(tbl_prev_lecod.lecod_day) as lecod_count, 
+                       tbl_loans.disburse_day, tbl_outstand.loan_stat_date');
+    $this->db->from('tbl_customer');
+    $this->db->join('tbl_loans', 'tbl_customer.customer_id = tbl_loans.customer_id');
+    
+   
+    $this->db->join('tbl_prev_lecod', 'tbl_loans.loan_id = tbl_prev_lecod.loan_id AND tbl_prev_lecod.depost IS NOT NULL', 'left');
+    
+
+    $this->db->join('tbl_outstand', 'tbl_loans.loan_id = tbl_outstand.loan_id', 'left');
+    
+    
+    $this->db->where('tbl_customer.customer_id', $customer_id);
+   
+    
+    // Group by loan_id (in case there are multiple records)
+    $this->db->group_by('tbl_loans.loan_id');
+    
+    // Execute the query
+    $query = $this->db->get();
+
+   
+    $result = $query->row();
+    
+    if ($result) {
+        
+        $loan_stat_date = new DateTime($result->loan_stat_date);
+        $disburse_day = new DateTime($result->disburse_day);
+        $current_day = new DateTime();  // Current date
+        
+       
+        $interval = $loan_stat_date->diff($current_day);
+        $missed_days = $interval->days;
+
+        // Calculate the difference from disburse_day if needed
+        $disburse_interval = $disburse_day->diff($current_day);
+        $disburse_missed_days = $disburse_interval->days;
+
+        // Add missed_days and disburse_missed_days to the result
+        $result->missed_days = $missed_days;
+        $result->disburse_missed_days = $disburse_missed_days;
+
+       
+        return $result;
+    }
+
+    return null;
+}
+
+public function get_total_missed_amount($customer_id)
+{
+    // Select required fields from tbl_loans, tbl_prev_lecod, and tbl_outstand
+    $this->db->select('tbl_loans.session, COUNT(tbl_prev_lecod.lecod_day) as lecod_count, 
+                       tbl_loans.disburse_day, tbl_outstand.loan_stat_date, 
+                       SUM(tbl_prev_lecod.depost) as missed_amount');
+    $this->db->from('tbl_customer');
+    $this->db->join('tbl_loans', 'tbl_customer.customer_id = tbl_loans.customer_id');
+    
+    // Join with tbl_prev_lecod where loan_id matches and depost is not null
+    $this->db->join('tbl_prev_lecod', 'tbl_loans.loan_id = tbl_prev_lecod.loan_id AND tbl_prev_lecod.depost IS NOT NULL', 'left');
+    
+    // Join with tbl_outstand where loan_id matches
+    $this->db->join('tbl_outstand', 'tbl_loans.loan_id = tbl_outstand.loan_id', 'left');
+    
+    // Add condition to filter by customer_id and loan_id
+    $this->db->where('tbl_customer.customer_id', $customer_id);
+   
+    
+    // Group by loan_id (in case there are multiple records)
+    $this->db->group_by('tbl_loans.loan_id');
+    
+    // Execute the query
+    $query = $this->db->get();
+
+    // Check if we got a result
+    $result = $query->row();
+    
+    if ($result) {
+        // Get the loan_stat_date and disburse_day from tbl_outstand and tbl_loans
+        $loan_stat_date = new DateTime($result->loan_stat_date);
+        $disburse_day = new DateTime($result->disburse_day);
+        $current_day = new DateTime();  // Current date
+        
+        // Calculate missed days from loan_stat_date
+        $interval = $loan_stat_date->diff($current_day);
+        $missed_days = $interval->days;
+
+        // Calculate the difference from disburse_day if needed
+        $disburse_interval = $disburse_day->diff($current_day);
+        $disburse_missed_days = $disburse_interval->days;
+
+        // Add missed_days, disburse_missed_days, and missed_amount to the result
+        $result->missed_days = $missed_days;
+        $result->disburse_missed_days = $disburse_missed_days;
+        $result->missed_amount = $result->missed_amount ?? 0;  // Ensure missed_amount is set if null
+        
+        return $result;
+    }
+
+    return null;
+}
+
+public function get_customer_status($customer_id)
+{
+    // Select customer_id and count loan_id
+    $this->db->select('tbl_customer.customer_id, COUNT(tbl_loans.loan_id) as total_loans');
+    $this->db->from('tbl_customer');
+    $this->db->join('tbl_loans', 'tbl_customer.customer_id = tbl_loans.customer_id', 'left');
+    
+    // Filter by customer_id
+    $this->db->where('tbl_customer.customer_id', $customer_id);
+
+    // Group by customer_id
+    $this->db->group_by('tbl_customer.customer_id');
+
+    // Execute the query
+    $query = $this->db->get();
+    
+    $result = $query->row();
+
+    if ($result) {
+        // Check the loan count and determine loan status
+        if ($result->total_loans == 1) {
+            $result->loan_status = 'New Customer';
+        } elseif ($result->total_loans > 1) {
+            $result->loan_status = 'Old Customer';
+        } else {
+            $result->loan_status = 'No Loan'; 
+        }
+
+        return $result;
+    }
+
+    return null; 
+}
+public function get_latest_sponsor_data($customer_id) {
+	
+	$this->db->select('tbl_sponser.*, tbl_customer.*');
+	$this->db->from('tbl_sponser');
+	$this->db->join('tbl_customer', 'tbl_sponser.customer_id = tbl_customer.customer_id');
+	$this->db->where('tbl_sponser.created_at = (SELECT MAX(created_at) FROM tbl_sponser)', NULL, FALSE);
+	$this->db->where('DATEDIFF(CURDATE(), tbl_sponser.created_at) <=', 2); 
+	$this->db->where('tbl_sponser.customer_id', $customer_id); 
+
+	$query = $this->db->get();
+
+	
+	return $query->result_array(); 
+}
+
+public function get_loan_withdrawal_current_month($comp_id) {
+    $data = $this->db->query("
+        SELECT 
+            c.customer_id, 
+            ot.comp_id, 
+            b.blanch_id, 
+            b.blanch_name,
+            c.f_name, 
+            c.m_name, 
+            c.l_name, 
+            c.phone_no,
+			l.disburse_day,
+            SUM(l.loan_aprove) AS total_loan_with, 
+            SUM(l.loan_int) AS total_loan_int
+        FROM 
+            tbl_outstand ot
+        LEFT JOIN 
+            tbl_loans l ON l.loan_id = ot.loan_id
+        LEFT JOIN 
+            tbl_customer c ON c.customer_id = l.customer_id
+        LEFT JOIN 
+            tbl_blanch b ON b.blanch_id = l.blanch_id
+        WHERE 
+            ot.comp_id = '$comp_id' 
+            AND l.loan_status = 'withdrawal'
+            AND MONTH(ot.loan_stat_date) = MONTH(CURDATE()) 
+            AND YEAR(ot.loan_stat_date) = YEAR(CURDATE())
+        GROUP BY 
+            c.customer_id, ot.comp_id, b.blanch_id, b.blanch_name, c.f_name, c.m_name, c.l_name, c.phone_no
+        ORDER BY 
+            b.blanch_name ASC, c.l_name ASC
+    ");
+    return $data->result();
+}
+
+
+public function get_total_withdrawal_current_month($comp_id) {
+    $data = $this->db->query("
+        SELECT 
+            SUM(l.loan_aprove) AS total_withdrawal
+        FROM 
+            tbl_outstand ot
+        LEFT JOIN 
+            tbl_loans l ON l.loan_id = ot.loan_id
+        WHERE 
+            ot.comp_id = '$comp_id' 
+            AND l.loan_status = 'withdrawal'
+            AND MONTH(ot.loan_stat_date) = MONTH(CURDATE()) 
+            AND YEAR(ot.loan_stat_date) = YEAR(CURDATE())
+    ");
+    return $data->row()->total_withdrawal ?? 0; 
+}
+
+
+public function get_total_loan_interest_current_month($comp_id) {
+    $data = $this->db->query("
+        SELECT 
+            SUM(l.loan_int) AS total_loan_interest
+        FROM 
+            tbl_outstand ot
+        LEFT JOIN 
+            tbl_loans l ON l.loan_id = ot.loan_id
+        WHERE 
+            ot.comp_id = '$comp_id' 
+            AND l.loan_status = 'withdrawal'
+            AND MONTH(ot.loan_stat_date) = MONTH(CURDATE()) 
+            AND YEAR(ot.loan_stat_date) = YEAR(CURDATE())
+    ");
+    return $data->row()->total_loan_interest ?? 0; // Return 0 if no result
+}
+
+public function get_interest_of_current_month($comp_id) {
+    $data = $this->db->query("
+        SELECT 
+            (SUM(l.loan_int) - SUM(l.loan_aprove)) AS interest_difference
+        FROM 
+            tbl_outstand ot
+        LEFT JOIN 
+            tbl_loans l ON l.loan_id = ot.loan_id
+        WHERE 
+            ot.comp_id = '$comp_id' 
+            AND l.loan_status = 'withdrawal'
+            AND MONTH(ot.loan_stat_date) = MONTH(CURDATE()) 
+            AND YEAR(ot.loan_stat_date) = YEAR(CURDATE())
+    ");
+    return $data->row()->interest_difference ?? 0; // Return 0 if no result
+}
+
+public function get_customer_withdrawal_current_month($comp_id) {
+    $data = $this->db->query("
+        SELECT 
+            COUNT(DISTINCT c.customer_id) AS total_customers, 
+            SUM(l.loan_aprove) AS total_loan_with, 
+            SUM(l.loan_int) AS total_loan_int
+        FROM 
+            tbl_outstand ot
+        LEFT JOIN 
+            tbl_loans l ON l.loan_id = ot.loan_id
+        LEFT JOIN 
+            tbl_customer c ON c.customer_id = l.customer_id
+        LEFT JOIN 
+            tbl_blanch b ON b.blanch_id = l.blanch_id
+        WHERE 
+            ot.comp_id = '$comp_id' 
+            AND l.loan_status = 'withdrawal'
+            AND MONTH(ot.loan_stat_date) = MONTH(CURDATE()) 
+            AND YEAR(ot.loan_stat_date) = YEAR(CURDATE())
+    ");
+    return $data->row()->total_customers ?? 0; // Return 0 if no result
+}
+
+public function get_total_withdrawal_last_month($comp_id) {
+    $data = $this->db->query("
+        SELECT 
+            SUM(l.loan_aprove) AS total_withdrawal
+        FROM 
+            tbl_outstand ot
+        LEFT JOIN 
+            tbl_loans l ON l.loan_id = ot.loan_id
+        WHERE 
+            ot.comp_id = '$comp_id' 
+            AND l.loan_status = 'withdrawal'
+            AND MONTH(ot.loan_stat_date) = MONTH(CURDATE()) - 1
+            AND YEAR(ot.loan_stat_date) = YEAR(CURDATE())
+            OR (MONTH(CURDATE()) = 1 AND MONTH(ot.loan_stat_date) = 12 AND YEAR(ot.loan_stat_date) = YEAR(CURDATE()) - 1)
+    ");
+    return $data->row()->total_withdrawal ?? 0; // Return 0 if no result
+}
+
+
+
+public function get_withdrawal_current_month($comp_id) {
+    $data = $this->db->query("
+        SELECT 
+            b.blanch_id, 
+            b.blanch_name,
+            COUNT(DISTINCT c.customer_id) AS total_customers,
+            SUM(l.loan_aprove) AS total_loan_with,
+            SUM(l.loan_int) AS total_loan_int,
+            COUNT(DISTINCT CASE WHEN l.loan_aprove >= 0 AND l.loan_aprove < 500000 THEN c.customer_id END) AS total_customers_with_loan_0_to_499999,
+            COUNT(DISTINCT CASE WHEN l.loan_aprove >= 500000 THEN c.customer_id END) AS total_customers_with_loan_above_500000
+        FROM 
+            tbl_outstand ot
+        LEFT JOIN 
+            tbl_loans l ON l.loan_id = ot.loan_id
+        LEFT JOIN 
+            tbl_customer c ON c.customer_id = l.customer_id
+        LEFT JOIN 
+            tbl_blanch b ON b.blanch_id = l.blanch_id
+        WHERE 
+            ot.comp_id = '$comp_id' 
+            AND l.loan_status = 'withdrawal'
+            AND MONTH(ot.loan_stat_date) = MONTH(CURDATE()) 
+            AND YEAR(ot.loan_stat_date) = YEAR(CURDATE())
+        GROUP BY 
+            b.blanch_id, b.blanch_name
+        ORDER BY 
+            b.blanch_name ASC
+    ");
+    return $data->result();
+}
+
+
+
+
+public function get_monthly_income_detail($comp_id) {
+    // Get the current month and year
+    $current_month = date('m'); // Numeric representation of the current month (01 to 12)
+    $current_year = date('Y');  // Full numeric representation of the current year (e.g., 2024)
+
+    // Construct the query to get details grouped by branch
+    $this->db->select('b.blanch_name, COUNT(DISTINCT c.customer_id) as customer_count, SUM(r.receve_amount) as total_receve_amount');
+    $this->db->from('tbl_receve r');
+    $this->db->join('tbl_income i', 'i.inc_id = r.inc_id');
+    $this->db->join('tbl_customer c', 'c.customer_id = r.customer_id');
+    $this->db->join('tbl_blanch b', 'b.blanch_id = c.blanch_id');
+    $this->db->join('tbl_employee e', 'e.empl_id = r.empl', 'left');
+    $this->db->join('tbl_loans l', 'l.loan_id = r.loan_id', 'left');
+    $this->db->where('r.comp_id', $comp_id);
+    $this->db->where('MONTH(r.receve_day)', $current_month);
+    $this->db->where('YEAR(r.receve_day)', $current_year);
+    $this->db->group_by('b.blanch_name');
+
+    // Execute the query for grouped data
+    $query = $this->db->get();
+    $branch_data = $query->result();
+
+    // Construct the query to get the overall sum of receve_amount
+    $this->db->select('SUM(r.receve_amount) as total_receve_amount_all_branches');
+    $this->db->from('tbl_receve r');
+    $this->db->where('r.comp_id', $comp_id);
+    $this->db->where('MONTH(r.receve_day)', $current_month);
+    $this->db->where('YEAR(r.receve_day)', $current_year);
+
+    // Execute the query for the overall sum
+    $total_query = $this->db->get();
+    $total_result = $total_query->row();
+
+    // Combine the results into an associative array
+    return [
+        'branch_data' => $branch_data,
+        'total_receve_amount_all_branches' => $total_result->total_receve_amount_all_branches
+    ];
+}
+
+public function get_sum_monthly_income($comp_id) {
+    $current_month = date('Y-m');
+    $data = $this->db->query("
+        SELECT SUM(receve_amount) AS total_receved
+        FROM tbl_receve
+        WHERE comp_id = ?
+        AND DATE_FORMAT(receve_day, '%Y-%m') = ?
+    ", array($comp_id, $current_month));
+    return $data->row();
+}
+
+
+
+
+public function get_total_malazo_pendingComp($comp_id) {
+    // Query to sum total_pend for all branches
+    $this->db->select('SUM(pt.total_pend) AS total_pending'); // Sum of total_pend
+    $this->db->from('tbl_pending_total pt');
+    $this->db->join('tbl_loans l', 'l.loan_id = pt.loan_id');
+    $this->db->join('tbl_blanch b', 'b.blanch_id = pt.blanch_id');
+    $this->db->join('tbl_customer c', 'c.customer_id = pt.customer_id');
+    $this->db->where('pt.comp_id', $comp_id);
+    $this->db->where('total_pend IS NOT FALSE');
+    
+    $data = $this->db->get(); // Execute query
+
+    // Fetch the result
+    $result = $data->row(); // Get the first row of the result
+
+    // Return the total_pending value
+    return $result ? $result->total_pending : 0; // Return the sum or 0 if no results
+}
+
+
+public function get_outstand_sixmonth_loan_company($comp_id) {
+    $six_months_ago = date("Y-m-d", strtotime("-6 months"));
+    $current_date = date("Y-m-d");
+
+    $query = "
+        SELECT * 
+        FROM tbl_outstand_loan ol
+        LEFT JOIN tbl_loans l ON l.loan_id = ol.loan_id
+        LEFT JOIN tbl_customer c ON c.customer_id = ol.customer_id
+        LEFT JOIN tbl_employee e ON e.empl_id = l.empl_id
+        LEFT JOIN tbl_outstand ot ON ot.loan_id = ol.loan_id
+        LEFT JOIN tbl_loan_category lc ON lc.category_id = l.category_id
+        LEFT JOIN tbl_account_transaction at ON at.trans_id = l.method
+        LEFT JOIN tbl_blanch b ON b.blanch_id = ol.blanch_id
+        WHERE ol.comp_id = ? 
+          AND ol.out_status = 'open'
+          AND ol.outstand_date BETWEEN ? AND ?
+          AND ol.remain_amount != 0
+    ";
+
+    $data = $this->db->query($query, array($comp_id, $six_months_ago, $current_date));
+    return $data->result();
+}
+
+public function get_total_remain_amount($sugus) {
+    $total_remain_amount = 0;
+    
+    
+    foreach ($sugus as $sugu) {
+        $total_remain_amount += $sugu->remain_amount;
+    }
+    
+  
+    return $total_remain_amount;
+}
+
+
+
+
 	
 }
