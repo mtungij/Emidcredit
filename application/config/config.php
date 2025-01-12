@@ -23,8 +23,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | a PHP script and you can easily do that on your own.
 |
 */
-// $config['base_url'] = 'https://emidcredit.phamasoft.com/'; 
-$config['base_url'] = 'http://localhost:8029/'; 
+$config['base_url'] = 'https://emidcredit.phamasoft.com/'; 
+// $config['base_url'] = 'http://localhost:8029/'; 
 
 /*
 |--------------------------------------------------------------------------
