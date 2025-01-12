@@ -52,11 +52,11 @@
                                     <thead class="thead-primary">
                                         <tr>
                                         <th>S/no.</th>
-                                        <!-- <th>Branch</th> -->
+                                        <th>Branch</th>
                                         <th>Customer</th>
-                                        <th>Employee</th>
-                                        <th>Loan Ac</th>
-                                        <th>Loan Product</th>
+                                        <th>Phone Number</th>
+                                        <!-- <th>Employee</th> -->
+                                        <!-- <th>Loan Product</th> -->
                                         <th>Loan Interest</th>
                                         <th>Loan Withdrawal</th>
                                         <th>Principal + interest</th>
@@ -75,11 +75,11 @@
                                 <?php foreach($default_blanch as $loan_aproveds): ?>
                                         <tr>
                                     <td><?php echo $no++; ?>.</td>
-                                    <!-- <td class="c"><?php //echo $loan_aproveds->blanch_name; ?></td> -->
-                                    <td><?php echo $loan_aproveds->f_name; ?> <?php echo substr($loan_aproveds->m_name, 0,1); ?> <?php echo $loan_aproveds->l_name; ?></td>
-                                   <td><?php echo $loan_aproveds->empl_name; ?></td> 
-                                    <td><?php echo $loan_aproveds->loan_code; ?></td>
-                                    <td><?php echo $loan_aproveds->loan_name ?></td>
+                                    <td class="c"><?php echo $loan_aproveds->blanch_name; ?></td> 
+                                    <td><?php echo $loan_aproveds->f_name; ?> <?php echo $loan_aproveds->m_name; ?> <?php echo $loan_aproveds->l_name; ?></td>
+                                   <td><?php echo $loan_aproveds->phone_no; ?></td> 
+                                   <!-- <td></?php echo $loan_aproveds->empl_name; ?></td>  -->
+                                    <!-- <td><//?php echo $loan_aproveds->loan_name ?></td> -->
                                     <td><?php echo $loan_aproveds->interest_formular; ?>%</td>
                                     <td><?php echo number_format($loan_aproveds->loan_aprove); ?></td>
                                     <td><?php echo number_format($loan_aproveds->loan_int); ?></td>
